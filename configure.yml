@@ -34,9 +34,16 @@
         group: minecraft
         mode: '0755'
 
-    - name: Download minecraft server jar
+    - name: Get the latest minecraft server jar url
+      command: ./get_latest_jar_url.py
+      delegate_to: localhost
+      become: false
+      register: get_latest_jar_url_output
+      changed_when: false
+
+    - name: Download the latest minecraft server jar
       get_url:
-        url: "{{ minecraft_jar_url }}"
+        url: "{{ get_latest_jar_url_output.stdout | trim }}"
         dest: "/home/minecraft/minecraft/server.jar"
         owner: minecraft
         group: minecraft

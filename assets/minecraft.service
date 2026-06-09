@@ -1,5 +1,7 @@
 [Unit]
 Description=A Minecraft Server
+Wants=network-online.target
+After=network-online.target
 
 [Service]
 User=minecraft
