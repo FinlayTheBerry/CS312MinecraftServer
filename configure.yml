@@ -1,0 +1,87 @@
+---
+- name: Configures a minecraft server onto an EC2 instance running AWS Linux.
+  hosts: all
+  become: true
+  vars:
+    minecraft_jar_url: "https://piston-data.mojang.com/v1/objects/97ccd4c0ed3f81bbb7bfacddd1090b0c56f9bc51/server.jar"
+
+  tasks:
+    - name: Update all packages
+      dnf:
+        name: "*"
+        state: latest
+        update_cache: true
+
+    - name: Install java
+      dnf:
+        name: java-26-amazon-corretto-headless
+        state: latest
+
+    - name: Create minecraft user
+      user:
+        name: minecraft
+        system: true
+        shell: /usr/sbin/nologin
+        home: "/home/minecraft"
+        create_home: true
+        state: present
+
+    - name: Create minecraft server folder
+      file:
+        path: "/home/minecraft/minecraft/"
+        state: directory
+        owner: minecraft
+        group: minecraft
+        mode: '0755'
+
+    - name: Download minecraft server jar
+      get_url:
+        url: "{{ minecraft_jar_url }}"
+        dest: "/home/minecraft/minecraft/server.jar"
+        owner: minecraft
+        group: minecraft
+        mode: '0644'
+
+    - name: Accept minecraft eula
+      copy:
+        content: "eula=true\n"
+        dest: "/home/minecraft/minecraft/eula.txt"
+        owner: minecraft
+        group: minecraft
+        mode: '0644'
+
+    - name: Deploy systemd service
+      copy:
+        src: ./minecraft.service
+        dest: /etc/systemd/system/minecraft.service
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Reload systemd daemon
+
+    - name: Deploy start.sh
+      copy:
+        src: ./start.sh
+        dest: /home/minecraft/minecraft/start.sh
+        owner: minecraft
+        group: minecraft
+        mode: '0755'
+
+    - name: Deploy stop.sh
+      copy:
+        src: ./stop.sh
+        dest: /home/minecraft/minecraft/stop.sh
+        owner: minecraft
+        group: minecraft
+        mode: '0755'
+
+    - name: Ensure and start systemd service
+      systemd:
+        name: minecraft.service
+        state: started
+        enabled: true
+
+  handlers:
+    - name: Reload systemd daemon
+      systemd:
+        daemon_reload: true

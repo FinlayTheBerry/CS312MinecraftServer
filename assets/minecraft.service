@@ -1,0 +1,14 @@
+[Unit]
+Description=A Minecraft Server
+
+[Service]
+User=minecraft
+WorkingDirectory=/home/minecraft/minecraft
+Type=simple
+ExecStart=/home/minecraft/minecraft/start.sh
+ExecStop=/home/minecraft/minecraft/stop.sh
+TimeoutStopSec=30
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
