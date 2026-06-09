@@ -52,7 +52,7 @@
 
     - name: Deploy systemd service
       copy:
-        src: ./minecraft.service
+        src: ./assets/minecraft.service
         dest: /etc/systemd/system/minecraft.service
         owner: root
         group: root
@@ -61,7 +61,7 @@
 
     - name: Deploy start.sh
       copy:
-        src: ./start.sh
+        src: ./assets/start.sh
         dest: /home/minecraft/minecraft/start.sh
         owner: minecraft
         group: minecraft
@@ -69,13 +69,13 @@
 
     - name: Deploy stop.sh
       copy:
-        src: ./stop.sh
+        src: ./assets/stop.sh
         dest: /home/minecraft/minecraft/stop.sh
         owner: minecraft
         group: minecraft
         mode: '0755'
 
-    - name: Ensure and start systemd service
+    - name: Enable and start systemd service
       systemd:
         name: minecraft.service
         state: started
